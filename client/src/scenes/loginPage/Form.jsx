@@ -40,7 +40,7 @@ const initialValuesRegister = {
   password: "",
   location: "",
   occupation: "",
-  picture: null,
+  picturePath: null,
 };
 
 const initialValuesLogin = {
@@ -62,9 +62,9 @@ const Form = () => {
     try {
       const formData = new FormData();
       for (let value in values) {
-        if (value === "picture") {
-          if (values.picture) {
-            formData.append("picture", values.picture);
+        if (value === "picturePath") {
+          if (values.picturePath) {
+            formData.append("picturePath", values.picturePath);
           }
         } else {
           formData.append(value, values[value]);

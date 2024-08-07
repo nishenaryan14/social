@@ -38,6 +38,7 @@ AWS.config.update({
   accessKeyId: process.env.ACCESS_KEY,
   secretAccessKey: process.env.ACCESS_SECRET,
   region: process.env.REGION,
+  BUCKET_NAME: process.env.BUCKET_NAME,
 });
 
 const s3 = new AWS.S3();
@@ -46,7 +47,7 @@ const s3 = new AWS.S3();
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: BUCKET_NAME,
+    bucket: process.env.BUCKET_NAME,
     metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
@@ -59,14 +60,14 @@ const upload = multer({
 /* ROUTES WITH FILES */
 app.post(
   "/auth/register",
-  upload.single("picture"),
+  upload.single("picturePath"),
   (req, res, next) => {
     console.log("File uploaded:", req.file);
     next();
   },
   register
 );
-app.post("/posts", verifyToken, upload.single("picture"), createPost);
+app.post("/posts", verifyToken, upload.single("picturePath"), createPost);
 
 /* ROUTES */
 app.use("/auth", authRoutes);
