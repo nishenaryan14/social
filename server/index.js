@@ -58,7 +58,15 @@ const storage = multerS3({
 const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
-app.post("/auth/register", upload.single("picture"), register);
+app.post(
+  "/auth/register",
+  upload.single("picture"),
+  (req, res, next) => {
+    console.log("File uploaded:", req.file);
+    next();
+  },
+  register
+);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 /* ROUTES */
