@@ -43,19 +43,18 @@ AWS.config.update({
 const s3 = new AWS.S3();
 
 /* FILE STORAGE */
-const storage = multerS3({
-  s3: s3,
-  bucket: process.env.BUCKET_NAME,
-  acl: "public-read",
-  metadata: (req, file, cb) => {
-    cb(null, { fieldName: file.fieldname });
-  },
-  key: (req, file, cb) => {
-    cb(null, `${Date.now().toString()}-${file.originalname}`);
-  },
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: BUCKET_NAME,
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      cb(null, file.originalname);
+    },
+  }),
 });
-
-const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
 app.post(
