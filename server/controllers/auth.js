@@ -10,11 +10,13 @@ export const register = async (req, res) => {
       lastName,
       email,
       password,
-      picturePath,
       friends,
       location,
       occupation,
     } = req.body;
+
+    // Assuming req.file.key contains the S3 file key
+    const picturePath = req.file ? req.file.key : "";
 
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
@@ -24,7 +26,7 @@ export const register = async (req, res) => {
       lastName,
       email,
       password: passwordHash,
-      picturePath,
+      picturePath, // Use the S3 key here
       friends,
       location,
       occupation,

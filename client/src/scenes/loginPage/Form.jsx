@@ -16,6 +16,7 @@ import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
 
+// Validation schemas
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
   lastName: yup.string().required("required"),
@@ -23,7 +24,7 @@ const registerSchema = yup.object().shape({
   password: yup.string().required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  picture: yup.mixed().required("required"), // Updated for file uploads
 });
 
 const loginSchema = yup.object().shape({
@@ -31,6 +32,7 @@ const loginSchema = yup.object().shape({
   password: yup.string().required("required"),
 });
 
+// Initial values
 const initialValuesRegister = {
   firstName: "",
   lastName: "",
@@ -38,7 +40,7 @@ const initialValuesRegister = {
   password: "",
   location: "",
   occupation: "",
-  picture: "",
+  picture: null,
 };
 
 const initialValuesLogin = {
@@ -55,53 +57,79 @@ const Form = () => {
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
 
+  // Handle registration
   const register = async (values, onSubmitProps) => {
-    // this allows us to send form info with image
-    const formData = new FormData();
-    for (let value in values) {
-      formData.append(value, values[value]);
-    }
-    formData.append("picturePath", values.picture.name);
-
-    const savedUserResponse = await fetch(
-      // "http://localhost:3001/auth/register",
-      "https://social-ty3k.onrender.com/auth/register",
-      {
-        method: "POST",
-        body: formData,
+    try {
+      const formData = new FormData();
+      for (let value in values) {
+        if (value === "picture") {
+          if (values.picture) {
+            formData.append("picture", values.picture);
+          }
+        } else {
+          formData.append(value, values[value]);
+        }
       }
-    );
-    const savedUser = await savedUserResponse.json();
-    onSubmitProps.resetForm();
 
-    if (savedUser) {
-      setPageType("login");
-    }
-  };
-
-  const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch(
-      // "http://localhost:3001/auth/login",
-      "https://social-ty3k.onrender.com/auth/login",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      }
-    );
-    const loggedIn = await loggedInResponse.json();
-    onSubmitProps.resetForm();
-    if (loggedIn) {
-      dispatch(
-        setLogin({
-          user: loggedIn.user,
-          token: loggedIn.token,
-        })
+      const response = await fetch(
+        "https://social-ty3k.onrender.com/auth/register",
+        {
+          method: "POST",
+          body: formData,
+        }
       );
-      navigate("/home");
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const savedUser = await response.json();
+      onSubmitProps.resetForm();
+
+      if (savedUser) {
+        setPageType("login");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      // Optionally show an error message to the user
     }
   };
 
+  // Handle login
+  const login = async (values, onSubmitProps) => {
+    try {
+      const response = await fetch(
+        "https://social-ty3k.onrender.com/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const loggedIn = await response.json();
+      onSubmitProps.resetForm();
+
+      if (loggedIn) {
+        dispatch(
+          setLogin({
+            user: loggedIn.user,
+            token: loggedIn.token,
+          })
+        );
+        navigate("/home");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      // Optionally show an error message to the user
+    }
+  };
+
+  // Handle form submission
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await login(values, onSubmitProps);
     if (isRegister) await register(values, onSubmitProps);
