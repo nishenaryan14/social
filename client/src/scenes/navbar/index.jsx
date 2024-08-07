@@ -36,13 +36,17 @@ const Navbar = () => {
   const neutralLight = theme.palette.neutral.light;
   const dark = theme.palette.neutral.dark;
   const background = theme.palette.background.default;
-  const primaryLight = theme.palette.primary.light;
+  const primaryLight = theme.palette.primary.dark;
   const alt = theme.palette.background.alt;
 
   const fullName = `${user.firstName} ${user.lastName}`;
 
   return (
-    <FlexBetween padding="1rem 6%" backgroundColor={alt}>
+    <FlexBetween
+      padding="1rem 6%"
+      backgroundColor={alt}
+      sx={{ position: "fixed", top: "0", left: "0", right: "0" }}
+    >
       <FlexBetween gap="1.75rem">
         <Typography
           fontWeight="bold"
@@ -56,7 +60,7 @@ const Navbar = () => {
             },
           }}
         >
-          Sociopedia
+          GoSocial
         </Typography>
         {isNonMobileScreens && (
           <FlexBetween

@@ -18,6 +18,7 @@ const HomePage = () => {
         width="100%"
         padding="2rem 6%"
         display={isNonMobileScreens ? "flex" : "block"}
+        marginTop="3.8rem"
         gap="0.5rem"
         justifyContent="space-between"
       >
