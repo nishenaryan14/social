@@ -17,6 +17,8 @@ import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import { users, posts } from "./data/index.js";
+import AWS from "aws-sdk";
+import multerS3 from "multer-s3";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -30,17 +32,29 @@ app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
-app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+
+/* AWS S3 CONFIGURATION */
+AWS.config.update({
+  accessKeyId: process.env.ACCESS_KEY,
+  secretAccessKey: process.env.ACCESS_SECRET,
+  region: process.env.REGION,
+});
+
+const s3 = new AWS.S3();
 
 /* FILE STORAGE */
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/assets");
+const storage = multerS3({
+  s3: s3,
+  bucket: process.env.BUCKET_NAME,
+  acl: "public-read",
+  metadata: (req, file, cb) => {
+    cb(null, { fieldName: file.fieldname });
   },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
+  key: (req, file, cb) => {
+    cb(null, `${Date.now().toString()}-${file.originalname}`);
   },
 });
+
 const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
