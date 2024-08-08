@@ -77,10 +77,13 @@ const Form = () => {
         console.log(key, value);
       }
 
-      const response = await fetch("http://localhost:3001/auth/register", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://social-ty3k.onrender.com/auth/register",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
