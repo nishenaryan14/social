@@ -24,7 +24,7 @@ const registerSchema = yup.object().shape({
   password: yup.string().required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
-  picture: yup.mixed().required("required"), // Updated for file uploads
+  picturePath: yup.mixed().required("required"), // Updated for file uploads
 });
 
 const loginSchema = yup.object().shape({
@@ -70,14 +70,17 @@ const Form = () => {
           formData.append(value, values[value]);
         }
       }
+      console.log("FormData:", formData);
 
-      const response = await fetch(
-        "https://social-ty3k.onrender.com/auth/register",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      // Print out the formData entries
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await fetch("http://localhost:3001/auth/register", {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -91,7 +94,6 @@ const Form = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      // Optionally show an error message to the user
     }
   };
 
@@ -125,7 +127,6 @@ const Form = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      // Optionally show an error message to the user
     }
   };
 
@@ -216,7 +217,7 @@ const Form = () => {
                     acceptedFiles=".jpg,.jpeg,.png"
                     multiple={false}
                     onDrop={(acceptedFiles) =>
-                      setFieldValue("picture", acceptedFiles[0])
+                      setFieldValue("picturePath", acceptedFiles[0])
                     }
                   >
                     {({ getRootProps, getInputProps }) => (
@@ -227,11 +228,11 @@ const Form = () => {
                         sx={{ "&:hover": { cursor: "pointer" } }}
                       >
                         <input {...getInputProps()} />
-                        {!values.picture ? (
+                        {!values.picturePath ? (
                           <p>Add Picture Here</p>
                         ) : (
                           <FlexBetween>
-                            <Typography>{values.picture.name}</Typography>
+                            <Typography>{values.picturePath.name}</Typography>
                             <EditOutlinedIcon />
                           </FlexBetween>
                         )}
@@ -265,40 +266,33 @@ const Form = () => {
             />
           </Box>
 
-          {/* BUTTONS */}
-          <Box>
-            <Button
-              fullWidth
-              type="submit"
-              sx={{
-                m: "2rem 0",
-                p: "1rem",
-                backgroundColor: palette.primary.main,
-                color: palette.background.alt,
-                "&:hover": { color: palette.primary.main },
-              }}
-            >
-              {isLogin ? "LOGIN" : "REGISTER"}
-            </Button>
-            <Typography
-              onClick={() => {
-                setPageType(isLogin ? "register" : "login");
-                resetForm();
-              }}
-              sx={{
-                textDecoration: "underline",
-                color: palette.primary.main,
-                "&:hover": {
-                  cursor: "pointer",
-                  color: palette.primary.light,
-                },
-              }}
-            >
-              {isLogin
-                ? "Don't have an account? Sign Up here."
-                : "Already have an account? Login here."}
-            </Typography>
-          </Box>
+          <Button
+            type="submit"
+            fullWidth
+            sx={{
+              mt: "2rem",
+              p: "1rem",
+              backgroundColor: palette.primary.main,
+              color: "white",
+              "&:hover": { color: palette.primary.main },
+            }}
+          >
+            {isLogin ? "LOGIN" : "REGISTER"}
+          </Button>
+
+          <Typography
+            onClick={() => setPageType(isLogin ? "register" : "login")}
+            sx={{
+              mt: "1rem",
+              textDecoration: "underline",
+              color: palette.primary.main,
+              "&:hover": { cursor: "pointer", color: palette.primary.light },
+            }}
+          >
+            {isLogin
+              ? "Don't have an account? Sign Up Here."
+              : "Already have an account? Login Here."}
+          </Typography>
         </form>
       )}
     </Formik>

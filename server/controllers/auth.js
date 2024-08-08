@@ -15,8 +15,8 @@ export const register = async (req, res) => {
       occupation,
     } = req.body;
 
-    // Assuming req.file.key contains the S3 file key
-    const picturePath = req.file ? req.file.key : "";
+    // Use the URL from the file upload
+    const picturePath = req.file ? req.file.location : ""; // Access the URL directly
 
     const salt = await bcrypt.genSalt();
     const passwordHash = await bcrypt.hash(password, salt);
@@ -26,7 +26,7 @@ export const register = async (req, res) => {
       lastName,
       email,
       password: passwordHash,
-      picturePath, // Use the S3 key here
+      picturePath, // Save the URL here
       friends,
       location,
       occupation,

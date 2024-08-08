@@ -4,8 +4,14 @@ import User from "../models/User.js";
 /* CREATE */
 export const createPost = async (req, res) => {
   try {
-    const { userId, description, picturePath } = req.body;
+    const { userId, description } = req.body;
+    const picturePath = req.file ? req.file.location : ""; // Handle file URL from multer-s3
+
+    // Find user by ID
     const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Create new post
     const newPost = new Post({
       userId,
       firstName: user.firstName,
@@ -13,14 +19,15 @@ export const createPost = async (req, res) => {
       location: user.location,
       description,
       userPicturePath: user.picturePath,
-      picturePath,
+      picturePath, // Save the URL of the uploaded picture
       likes: {},
       comments: [],
     });
     await newPost.save();
 
-    const post = await Post.find();
-    res.status(201).json(post);
+    // Retrieve all posts to return
+    const posts = await Post.find();
+    res.status(201).json(posts);
   } catch (err) {
     res.status(409).json({ message: err.message });
   }
