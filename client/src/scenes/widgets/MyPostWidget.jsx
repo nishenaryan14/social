@@ -27,13 +27,14 @@ import WidgetWrapper from "components/WidgetWrapper";
 import FlexBetween from "components/FlexBetween";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import imageCompression from "browser-image-compression";
 
 const MyPostWidget = ({ picturePath }) => {
   const dispatch = useDispatch();
   const [isImage, setIsImage] = useState(false);
   const [image, setImage] = useState(null);
   const [post, setPost] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
   const { palette } = useTheme();
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
@@ -42,12 +43,24 @@ const MyPostWidget = ({ picturePath }) => {
   const medium = palette.neutral.medium;
 
   const handlePost = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     const formData = new FormData();
     formData.append("userId", _id);
     formData.append("description", post);
+
     if (image) {
-      formData.append("picturePath", image);
+      try {
+        // Compress the image before appending to formData
+        const compressedImage = await imageCompression(image, {
+          maxSizeMB: 1, // Maximum file size in MB
+          maxWidthOrHeight: 1024, // Maximum width or height in pixels
+        });
+        formData.append("picturePath", compressedImage);
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -63,7 +76,6 @@ const MyPostWidget = ({ picturePath }) => {
         setImage(null);
         setPost("");
         toast.success("Post created successfully!", { position: "top-center" });
-        setIsImage(false);
       } else {
         toast.error("Failed to create post.", { position: "top-center" });
       }
@@ -71,7 +83,7 @@ const MyPostWidget = ({ picturePath }) => {
       console.error("Error posting:", error);
       toast.error("Failed to create post.", { position: "top-center" });
     } finally {
-      setLoading(false); // End loading
+      setLoading(false);
     }
   };
 
@@ -174,7 +186,7 @@ const MyPostWidget = ({ picturePath }) => {
           )}
 
           <Button
-            disabled={!post || loading} // Disable button when loading
+            disabled={!post || loading}
             onClick={handlePost}
             sx={{
               color: palette.primary.light,
@@ -190,7 +202,6 @@ const MyPostWidget = ({ picturePath }) => {
                   position: "absolute",
                   top: "50%",
                   left: "50%",
-                  color: "#000",
                   marginTop: "-12px",
                   marginLeft: "-12px",
                 }}
