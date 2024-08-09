@@ -47,8 +47,7 @@ const MyPostWidget = ({ picturePath }) => {
     }
 
     try {
-      // const response = await fetch(`https://social-ty3k.onrender.com/posts`, {
-      const response = await fetch(`http://localhost:3001/posts`, {
+      const response = await fetch(`https://social-ty3k.onrender.com/posts`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
