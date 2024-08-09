@@ -10,7 +10,6 @@ import {
   IconButton,
   Typography,
   useTheme,
-  Skeleton,
   TextField,
   Button,
 } from "@mui/material";
@@ -21,6 +20,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import { useInView } from "react-intersection-observer";
+import EmojiPicker from "emoji-picker-react";
 
 const PostWidget = ({
   postId,
@@ -33,10 +33,11 @@ const PostWidget = ({
   likes,
   comments,
   isLoading,
+  isProfile,
 }) => {
   const [isComments, setIsComments] = useState(false);
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -72,18 +73,25 @@ const PostWidget = ({
     setNewComment(e.target.value);
   };
 
+  const handleEmojiClick = (event, emojiObject) => {
+    setNewComment((prevComment) => prevComment + emojiObject.emoji);
+    setShowEmojiPicker(false);
+  };
+
   const handleCommentSubmit = async () => {
     try {
       const response = await fetch(
         `https://social-ty3k.onrender.com/posts/${postId}/comment`,
-        // `http://localhost:3001/posts/${postId}/comment`,
         {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId: loggedInUserId, comment: newComment }),
+          body: JSON.stringify({
+            userId: loggedInUserId,
+            comment: newComment,
+          }),
         }
       );
 
@@ -102,43 +110,8 @@ const PostWidget = ({
   return (
     <WidgetWrapper m="2rem 0">
       {isLoading ? (
-        <>
-          <Skeleton variant="rectangular" width="100%" height={50} />
-          <Skeleton variant="text" width="80%" sx={{ mt: "1rem" }} />
-          <Skeleton
-            variant="rectangular"
-            width="100%"
-            height={300}
-            sx={{ mt: "0.75rem" }}
-          />
-          <FlexBetween mt="0.25rem">
-            <FlexBetween gap="1rem">
-              <FlexBetween gap="0.3rem">
-                <IconButton disabled>
-                  <FavoriteBorderOutlined />
-                </IconButton>
-                <Typography>
-                  <Skeleton width={50} />
-                </Typography>
-              </FlexBetween>
-              <FlexBetween gap="0.3rem">
-                <IconButton disabled>
-                  <ChatBubbleOutlineOutlined />
-                </IconButton>
-                <Typography>
-                  <Skeleton width={30} />
-                </Typography>
-              </FlexBetween>
-            </FlexBetween>
-            <IconButton disabled>
-              <ShareOutlined />
-            </IconButton>
-          </FlexBetween>
-          <Box mt="0.5rem">
-            <Skeleton variant="text" width="80%" sx={{ mb: "0.5rem" }} />
-            <Skeleton variant="text" width="60%" sx={{ mb: "0.5rem" }} />
-          </Box>
-        </>
+        // Loading skeletons here...
+        <Box>Loading...</Box>
       ) : (
         <>
           <Friend
@@ -146,6 +119,7 @@ const PostWidget = ({
             name={name}
             subtitle={location}
             userPicturePath={userPicturePath}
+            isProfile={isProfile}
           />
           <Typography color={main} sx={{ mt: "1rem" }}>
             {description}
@@ -158,7 +132,6 @@ const PostWidget = ({
               alt="post"
               style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
               src={inView ? picturePath : undefined}
-              onLoad={() => setIsImageLoaded(true)}
               loading="lazy"
             />
           )}
@@ -200,7 +173,11 @@ const PostWidget = ({
                     }}
                   >
                     <Typography
-                      sx={{ color: primary, fontWeight: "bold", mr: "0.5rem" }}
+                      sx={{
+                        color: primary,
+                        fontWeight: "bold",
+                        mr: "0.5rem",
+                      }}
                     >
                       {comment.userName}
                     </Typography>
@@ -211,7 +188,7 @@ const PostWidget = ({
                 </Box>
               ))}
               <Divider />
-              <Box mt="1rem" display="flex" gap="1rem">
+              <Box mt="1rem" display="flex" gap="1rem" alignItems="center">
                 <TextField
                   variant="outlined"
                   placeholder="Add a comment..."
@@ -223,11 +200,23 @@ const PostWidget = ({
                 <Button
                   variant="contained"
                   color="primary"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                >
+                  😊
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
                   onClick={handleCommentSubmit}
                 >
                   Post
                 </Button>
               </Box>
+              {showEmojiPicker && (
+                <Box mt="1rem">
+                  <EmojiPicker onEmojiClick={handleEmojiClick} />
+                </Box>
+              )}
             </Box>
           )}
         </>
