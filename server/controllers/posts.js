@@ -79,3 +79,34 @@ export const likePost = async (req, res) => {
     res.status(404).json({ message: err.message });
   }
 };
+
+/*COMMENTS*/
+export const addComment = async (req, res) => {
+  const { id: postId } = req.params;
+  const { userId, comment } = req.body;
+
+  try {
+    // Find the post by ID
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    post.comments.push({
+      userId,
+      text: comment,
+      userName: `${user.firstName} ${user.lastName}`,
+    });
+    await post.save();
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in addComment:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

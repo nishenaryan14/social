@@ -11,11 +11,13 @@ import {
   Typography,
   useTheme,
   Skeleton,
+  TextField,
+  Button,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import { useInView } from "react-intersection-observer";
@@ -30,10 +32,11 @@ const PostWidget = ({
   userPicturePath,
   likes,
   comments,
-  isLoading, // New prop to handle loading state
+  isLoading,
 }) => {
   const [isComments, setIsComments] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [newComment, setNewComment] = useState("");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -63,6 +66,37 @@ const PostWidget = ({
     );
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
+  };
+
+  const handleCommentChange = (e) => {
+    setNewComment(e.target.value);
+  };
+
+  const handleCommentSubmit = async () => {
+    try {
+      const response = await fetch(
+        `https://social-ty3k.onrender.com/posts/${postId}/comment`,
+        // `http://localhost:3001/posts/${postId}/comment`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId: loggedInUserId, comment: newComment }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to post comment");
+      }
+
+      const updatedPost = await response.json();
+      dispatch(setPost({ post: updatedPost }));
+      setNewComment(""); // Clear the input field
+    } catch (error) {
+      console.error("Error posting comment:", error);
+    }
   };
 
   return (
@@ -123,9 +157,9 @@ const PostWidget = ({
               height="auto"
               alt="post"
               style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-              src={inView ? picturePath : undefined} // Load image only when in view
-              onLoad={() => setIsImageLoaded(true)} // Optional: handle image load
-              loading="lazy" // Optional: HTML5 lazy loading
+              src={inView ? picturePath : undefined}
+              onLoad={() => setIsImageLoaded(true)}
+              loading="lazy"
             />
           )}
           <FlexBetween mt="0.25rem">
@@ -156,14 +190,44 @@ const PostWidget = ({
           {isComments && (
             <Box mt="0.5rem">
               {comments.map((comment, i) => (
-                <Box key={`${name}-${i}`}>
+                <Box key={`${comment.userId}-${i}`} sx={{ mb: "0.5rem" }}>
                   <Divider />
-                  <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                    {comment}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      p: "0.5rem 1rem",
+                    }}
+                  >
+                    <Typography
+                      sx={{ color: primary, fontWeight: "bold", mr: "0.5rem" }}
+                    >
+                      {comment.userName}
+                    </Typography>
+                    <Typography sx={{ color: main, lineHeight: 1.5 }}>
+                      {comment.text}
+                    </Typography>
+                  </Box>
                 </Box>
               ))}
               <Divider />
+              <Box mt="1rem" display="flex" gap="1rem">
+                <TextField
+                  variant="outlined"
+                  placeholder="Add a comment..."
+                  fullWidth
+                  size="small"
+                  value={newComment}
+                  onChange={handleCommentChange}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCommentSubmit}
+                >
+                  Post
+                </Button>
+              </Box>
             </Box>
           )}
         </>
