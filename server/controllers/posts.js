@@ -25,8 +25,8 @@ export const createPost = async (req, res) => {
     });
     await newPost.save();
 
-    // Retrieve all posts to return
-    const posts = await Post.find();
+    // Retrieve all posts sorted by createdAt in descending order to return
+    const posts = await Post.find().sort({ createdAt: -1 });
     res.status(201).json(posts);
   } catch (err) {
     console.error("Error creating post:", err);
@@ -37,8 +37,9 @@ export const createPost = async (req, res) => {
 /* READ */
 export const getFeedPosts = async (req, res) => {
   try {
-    const post = await Post.find();
-    res.status(200).json(post);
+    // Retrieve all posts sorted by createdAt in descending order
+    const posts = await Post.find().sort({ createdAt: -1 });
+    res.status(200).json(posts);
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
@@ -47,8 +48,9 @@ export const getFeedPosts = async (req, res) => {
 export const getUserPosts = async (req, res) => {
   try {
     const { userId } = req.params;
-    const post = await Post.find({ userId });
-    res.status(200).json(post);
+    // Retrieve posts by specific user sorted by createdAt in descending order
+    const posts = await Post.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json(posts);
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
@@ -60,6 +62,9 @@ export const likePost = async (req, res) => {
     const { id } = req.params;
     const { userId } = req.body;
     const post = await Post.findById(id);
+
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
     const isLiked = post.likes.get(userId);
 
     if (isLiked) {
@@ -68,12 +73,7 @@ export const likePost = async (req, res) => {
       post.likes.set(userId, true);
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      { likes: post.likes },
-      { new: true }
-    );
-
+    const updatedPost = await post.save();
     res.status(200).json(updatedPost);
   } catch (err) {
     res.status(404).json({ message: err.message });
