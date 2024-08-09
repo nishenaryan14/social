@@ -4,7 +4,7 @@ import {
   LocationOnOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material";
-import { Box, Typography, Divider, useTheme } from "@mui/material";
+import { Box, Typography, Divider, useTheme, Skeleton } from "@mui/material";
 import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -38,7 +38,63 @@ const UserWidget = ({ userId, picturePath }) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) {
-    return null;
+    return (
+      <WidgetWrapper>
+        <FlexBetween gap="0.5rem" pb="1.1rem">
+          <Skeleton variant="circular" width={60} height={60} />
+          <Box>
+            <Skeleton variant="text" width={120} height={30} />
+            <Skeleton variant="text" width={80} height={20} />
+          </Box>
+        </FlexBetween>
+
+        <Divider />
+
+        <Box p="1rem 0">
+          <Box display="flex" alignItems="center" gap="1rem" mb="0.5rem">
+            <Skeleton variant="circular" width={40} height={40} />
+            <Skeleton variant="text" width={150} height={30} />
+          </Box>
+          <Box display="flex" alignItems="center" gap="1rem">
+            <Skeleton variant="circular" width={40} height={40} />
+            <Skeleton variant="text" width={150} height={30} />
+          </Box>
+        </Box>
+
+        <Divider />
+
+        <Box p="1rem 0">
+          <FlexBetween mb="0.5rem">
+            <Skeleton variant="text" width={200} height={20} />
+            <Skeleton variant="text" width={80} height={20} />
+          </FlexBetween>
+          <FlexBetween>
+            <Skeleton variant="text" width={200} height={20} />
+            <Skeleton variant="text" width={80} height={20} />
+          </FlexBetween>
+        </Box>
+
+        <Divider />
+
+        <Box p="1rem 0">
+          <Skeleton variant="text" width={200} height={20} />
+          <FlexBetween gap="1rem" mb="0.5rem">
+            <Skeleton variant="rectangular" width={60} height={60} />
+            <Box>
+              <Skeleton variant="text" width={100} height={20} />
+              <Skeleton variant="text" width={150} height={20} />
+            </Box>
+          </FlexBetween>
+          <FlexBetween gap="1rem">
+            <Skeleton variant="rectangular" width={60} height={60} />
+            <Box>
+              <Skeleton variant="text" width={100} height={20} />
+              <Skeleton variant="text" width={150} height={20} />
+            </Box>
+          </FlexBetween>
+        </Box>
+      </WidgetWrapper>
+    );
   }
 
   const {

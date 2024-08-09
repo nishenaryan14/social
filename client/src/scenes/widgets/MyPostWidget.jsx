@@ -76,6 +76,7 @@ const MyPostWidget = ({ picturePath }) => {
         setImage(null);
         setPost("");
         toast.success("Post created successfully!", { position: "top-center" });
+        setIsImage(false);
       } else {
         toast.error("Failed to create post.", { position: "top-center" });
       }

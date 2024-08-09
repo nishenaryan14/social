@@ -4,11 +4,18 @@ import {
   FavoriteOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  Typography,
+  useTheme,
+  Skeleton,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 
@@ -22,6 +29,7 @@ const PostWidget = ({
   userPicturePath,
   likes,
   comments,
+  isLoading, // New prop to handle loading state
 }) => {
   const [isComments, setIsComments] = useState(false);
   const dispatch = useDispatch();
@@ -52,61 +60,103 @@ const PostWidget = ({
 
   return (
     <WidgetWrapper m="2rem 0">
-      <Friend
-        friendId={postUserId}
-        name={name}
-        subtitle={location}
-        userPicturePath={userPicturePath}
-      />
-      <Typography color={main} sx={{ mt: "1rem" }}>
-        {description}
-      </Typography>
-      {picturePath && (
-        <img
-          width="100%"
-          height="auto"
-          alt="post"
-          style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-          src={picturePath}
-        />
-      )}
-      <FlexBetween mt="0.25rem">
-        <FlexBetween gap="1rem">
-          <FlexBetween gap="0.3rem">
-            <IconButton onClick={patchLike}>
-              {isLiked ? (
-                <FavoriteOutlined sx={{ color: primary }} />
-              ) : (
-                <FavoriteBorderOutlined />
-              )}
+      {isLoading ? (
+        <>
+          <Skeleton variant="rectangular" width="100%" height={50} />
+          <Skeleton variant="text" width="80%" sx={{ mt: "1rem" }} />
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height={300}
+            sx={{ mt: "0.75rem" }}
+          />
+          <FlexBetween mt="0.25rem">
+            <FlexBetween gap="1rem">
+              <FlexBetween gap="0.3rem">
+                <IconButton disabled>
+                  <FavoriteBorderOutlined />
+                </IconButton>
+                <Typography>
+                  <Skeleton width={50} />
+                </Typography>
+              </FlexBetween>
+              <FlexBetween gap="0.3rem">
+                <IconButton disabled>
+                  <ChatBubbleOutlineOutlined />
+                </IconButton>
+                <Typography>
+                  <Skeleton width={30} />
+                </Typography>
+              </FlexBetween>
+            </FlexBetween>
+            <IconButton disabled>
+              <ShareOutlined />
             </IconButton>
-            <Typography>{likeCount}</Typography>
           </FlexBetween>
+          <Box mt="0.5rem">
+            <Skeleton variant="text" width="80%" sx={{ mb: "0.5rem" }} />
+            <Skeleton variant="text" width="60%" sx={{ mb: "0.5rem" }} />
+          </Box>
+        </>
+      ) : (
+        <>
+          <Friend
+            friendId={postUserId}
+            name={name}
+            subtitle={location}
+            userPicturePath={userPicturePath}
+          />
+          <Typography color={main} sx={{ mt: "1rem" }}>
+            {description}
+          </Typography>
+          {picturePath && (
+            <img
+              width="100%"
+              height="auto"
+              alt="post"
+              style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
+              src={picturePath}
+            />
+          )}
+          <FlexBetween mt="0.25rem">
+            <FlexBetween gap="1rem">
+              <FlexBetween gap="0.3rem">
+                <IconButton onClick={patchLike}>
+                  {isLiked ? (
+                    <FavoriteOutlined sx={{ color: primary }} />
+                  ) : (
+                    <FavoriteBorderOutlined />
+                  )}
+                </IconButton>
+                <Typography>{likeCount}</Typography>
+              </FlexBetween>
 
-          <FlexBetween gap="0.3rem">
-            <IconButton onClick={() => setIsComments(!isComments)}>
-              <ChatBubbleOutlineOutlined />
+              <FlexBetween gap="0.3rem">
+                <IconButton onClick={() => setIsComments(!isComments)}>
+                  <ChatBubbleOutlineOutlined />
+                </IconButton>
+                <Typography>{comments.length}</Typography>
+              </FlexBetween>
+            </FlexBetween>
+
+            <IconButton>
+              <ShareOutlined />
             </IconButton>
-            <Typography>{comments.length}</Typography>
           </FlexBetween>
-        </FlexBetween>
-
-        <IconButton>
-          <ShareOutlined />
-        </IconButton>
-      </FlexBetween>
-      {isComments && (
-        <Box mt="0.5rem">
-          {comments.map((comment, i) => (
-            <Box key={`${name}-${i}`}>
+          {isComments && (
+            <Box mt="0.5rem">
+              {comments.map((comment, i) => (
+                <Box key={`${name}-${i}`}>
+                  <Divider />
+                  <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
+                    {comment}
+                  </Typography>
+                </Box>
+              ))}
               <Divider />
-              <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                {comment}
-              </Typography>
             </Box>
-          ))}
-          <Divider />
-        </Box>
+          )}
+        </>
       )}
     </WidgetWrapper>
   );
