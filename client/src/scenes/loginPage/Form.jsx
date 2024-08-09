@@ -6,6 +6,7 @@ import {
   useMediaQuery,
   Typography,
   useTheme,
+  CircularProgress, // Import CircularProgress
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
@@ -50,6 +51,7 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [loading, setLoading] = useState(false); // Add loading state
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -59,6 +61,7 @@ const Form = () => {
 
   // Handle registration
   const register = async (values, onSubmitProps) => {
+    setLoading(true); // Set loading to true
     try {
       const formData = new FormData();
       for (let value in values) {
@@ -97,11 +100,14 @@ const Form = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
 
   // Handle login
   const login = async (values, onSubmitProps) => {
+    setLoading(true); // Set loading to true
     try {
       const response = await fetch(
         "https://social-ty3k.onrender.com/auth/login",
@@ -130,6 +136,8 @@ const Form = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
 
@@ -279,8 +287,15 @@ const Form = () => {
               color: "white",
               "&:hover": { color: palette.primary.main },
             }}
+            disabled={loading} // Disable button while loading
           >
-            {isLogin ? "LOGIN" : "REGISTER"}
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : isLogin ? (
+              "LOGIN"
+            ) : (
+              "REGISTER"
+            )}
           </Button>
 
           <Typography
