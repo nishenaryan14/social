@@ -85,19 +85,22 @@ app.post("/auth/register", upload.single("picturePath"), async (req, res) => {
 });
 
 // CREATE POST WITH FILE UPLOAD
+// CREATE POST WITH FILE UPLOAD
 app.post(
   "/posts",
   verifyToken,
-  upload.single("picturePath"), // Handle file upload
+  upload.single("picturePath"),
   (req, res, next) => {
+    console.log("Incoming request:", req.body);
     if (req.file) {
       console.log("File uploaded:", req.file);
     } else {
       console.error("File upload error");
+      return res.status(400).send("File upload error");
     }
     next();
   },
-  createPost
+  createPost // Pass req and res directly to the createPost controller
 );
 
 // ROUTES

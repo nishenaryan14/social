@@ -42,12 +42,13 @@ const MyPostWidget = ({ picturePath }) => {
     formData.append("userId", _id);
     formData.append("description", post);
     if (image) {
-      formData.append("picture", image);
-      formData.append("picturePath", image.name);
+      formData.append("picturePath", image);
+      // formData.append("picturePath", image.name);
     }
 
     try {
-      const response = await fetch(`https://social-ty3k.onrender.com/posts`, {
+      // const response = await fetch(`https://social-ty3k.onrender.com/posts`, {
+      const response = await fetch(`http://localhost:3001/posts`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

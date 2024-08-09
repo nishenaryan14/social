@@ -29,7 +29,8 @@ export const createPost = async (req, res) => {
     const posts = await Post.find();
     res.status(201).json(posts);
   } catch (err) {
-    res.status(409).json({ message: err.message });
+    console.error("Error creating post:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
