@@ -18,6 +18,7 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
+import { useInView } from "react-intersection-observer";
 
 const PostWidget = ({
   postId,
@@ -32,6 +33,7 @@ const PostWidget = ({
   isLoading, // New prop to handle loading state
 }) => {
   const [isComments, setIsComments] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -41,6 +43,11 @@ const PostWidget = ({
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
+
+  const { ref: imageRef, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
 
   const patchLike = async () => {
     const response = await fetch(
@@ -111,11 +118,14 @@ const PostWidget = ({
           </Typography>
           {picturePath && (
             <img
+              ref={imageRef}
               width="100%"
               height="auto"
               alt="post"
               style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-              src={picturePath}
+              src={inView ? picturePath : undefined} // Load image only when in view
+              onLoad={() => setIsImageLoaded(true)} // Optional: handle image load
+              loading="lazy" // Optional: HTML5 lazy loading
             />
           )}
           <FlexBetween mt="0.25rem">
