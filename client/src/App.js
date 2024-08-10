@@ -7,6 +7,8 @@ import {
 } from "react-router-dom";
 import HomePage from "scenes/homePage";
 import LoginPage from "scenes/loginPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ProfilePage from "scenes/profilePage";
 import { useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -51,6 +53,17 @@ function App() {
           />
         </Routes>
       </ThemeProvider>
+      <ToastContainer
+        position="top-center" // Position toast in the top center
+        autoClose={5000} // Duration to show the toast
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }

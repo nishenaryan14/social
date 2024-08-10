@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -6,7 +6,7 @@ import {
   useMediaQuery,
   Typography,
   useTheme,
-  CircularProgress, // Import CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
@@ -16,6 +16,7 @@ import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
+import { toast } from "react-toastify";
 
 // Validation schemas
 const registerSchema = yup.object().shape({
@@ -25,7 +26,7 @@ const registerSchema = yup.object().shape({
   password: yup.string().required("required"),
   location: yup.string().required("required"),
   occupation: yup.string().required("required"),
-  picturePath: yup.mixed().required("required"), // Updated for file uploads
+  picturePath: yup.mixed().required("required"),
 });
 
 const loginSchema = yup.object().shape({
@@ -51,7 +52,7 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
-  const [loading, setLoading] = useState(false); // Add loading state
+  const [loading, setLoading] = useState(false);
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -59,9 +60,32 @@ const Form = () => {
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
 
+  // Toast notification handler
+  useEffect(() => {
+    let toastId;
+    if (loading) {
+      // toastId = toast.loading("Please wait...");
+      const timer = setTimeout(() => {
+        if (loading) {
+          toast.update(toastId, {
+            render:
+              "The server is taking longer than usual. Please be patient.",
+            type: "info",
+            autoClose: false,
+          });
+        }
+      }, 18000); // 18 seconds
+
+      return () => clearTimeout(timer);
+    }
+    return () => {
+      if (toastId) toast.dismiss(toastId);
+    };
+  }, [loading]);
+
   // Handle registration
   const register = async (values, onSubmitProps) => {
-    setLoading(true); // Set loading to true
+    setLoading(true);
     try {
       const formData = new FormData();
       for (let value in values) {
@@ -72,12 +96,6 @@ const Form = () => {
         } else {
           formData.append(value, values[value]);
         }
-      }
-      console.log("FormData:", formData);
-
-      // Print out the formData entries
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
       }
 
       const response = await fetch(
@@ -101,13 +119,13 @@ const Form = () => {
     } catch (error) {
       console.error("Registration error:", error);
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
   // Handle login
   const login = async (values, onSubmitProps) => {
-    setLoading(true); // Set loading to true
+    setLoading(true);
     try {
       const response = await fetch(
         "https://social-ty3k.onrender.com/auth/login",
@@ -137,7 +155,7 @@ const Form = () => {
     } catch (error) {
       console.error("Login error:", error);
     } finally {
-      setLoading(false); // Set loading to false
+      setLoading(false);
     }
   };
 
@@ -161,7 +179,6 @@ const Form = () => {
         handleChange,
         handleSubmit,
         setFieldValue,
-        resetForm,
       }) => (
         <form onSubmit={handleSubmit}>
           <Box
@@ -287,7 +304,7 @@ const Form = () => {
               color: "white",
               "&:hover": { color: palette.primary.main },
             }}
-            disabled={loading} // Disable button while loading
+            disabled={loading}
           >
             {loading ? (
               <CircularProgress size={24} color="inherit" />
