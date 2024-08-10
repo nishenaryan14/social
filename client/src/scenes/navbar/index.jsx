@@ -119,6 +119,9 @@ const Navbar = () => {
                     sx={{
                       width: "80vw", // Width set to 80% of the viewport
                       boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
+                      ...(isNonMobileScreens
+                        ? {} // No changes for non-mobile screens
+                        : { width: "100vw", left: "0" }), // Full width on mobile screens
                     }}
                   >
                     <InputBase
