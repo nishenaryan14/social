@@ -4,7 +4,14 @@ import {
   LocationOnOutlined,
   WorkOutlineOutlined,
 } from "@mui/icons-material";
-import { Box, Typography, Divider, useTheme, Skeleton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Divider,
+  useTheme,
+  Skeleton,
+  Avatar,
+} from "@mui/material";
 import UserImage from "components/UserImage";
 import FlexBetween from "components/FlexBetween";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -20,7 +27,8 @@ const UserWidget = ({ userId, picturePath }) => {
   const dark = palette.neutral.dark;
   const medium = palette.neutral.medium;
   const main = palette.neutral.main;
-
+  const primaryLight = palette.primary.light;
+  const primaryDark = palette.primary.dark;
   const getUser = async () => {
     const response = await fetch(
       `https://social-ty3k.onrender.com/users/${userId}`,
@@ -116,7 +124,21 @@ const UserWidget = ({ userId, picturePath }) => {
         onClick={() => navigate(`/profile/${userId}`)}
       >
         <FlexBetween gap="1rem">
-          <UserImage image={picturePath} />
+          {picturePath ? (
+            <UserImage image={picturePath} size="55px" />
+          ) : (
+            <Avatar
+              sx={{
+                bgcolor: primaryLight,
+                color: primaryDark,
+                width: "55px",
+                height: "55px",
+                fontSize: "1.25rem",
+              }}
+            >
+              {`${firstName} ${lastName}`[0].toUpperCase()}
+            </Avatar>
+          )}
           <Box>
             <Typography
               variant="h4"

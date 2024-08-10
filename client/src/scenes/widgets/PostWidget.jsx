@@ -12,6 +12,7 @@ import {
   useTheme,
   TextField,
   Button,
+  Skeleton,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
@@ -101,7 +102,7 @@ const PostWidget = ({
 
       const updatedPost = await response.json();
       dispatch(setPost({ post: updatedPost }));
-      setNewComment(""); // Clear the input field
+      setNewComment("");
     } catch (error) {
       console.error("Error posting comment:", error);
     }
@@ -110,8 +111,23 @@ const PostWidget = ({
   return (
     <WidgetWrapper m="2rem 0">
       {isLoading ? (
-        // Loading skeletons here...
-        <Box>Loading...</Box>
+        <>
+          <Skeleton variant="text" width="30%" height={40} />
+          <Skeleton
+            variant="rectangular"
+            width="100%"
+            height={200}
+            sx={{ mt: 1 }}
+          />
+          <FlexBetween mt="0.25rem">
+            <FlexBetween gap="1rem">
+              <Skeleton variant="circular" width={40} height={40} />
+              <Skeleton variant="text" width={60} />
+            </FlexBetween>
+            <Skeleton variant="circular" width={40} height={40} />
+          </FlexBetween>
+          <Skeleton variant="text" width="80%" height={20} sx={{ mt: 1 }} />
+        </>
       ) : (
         <>
           <Friend

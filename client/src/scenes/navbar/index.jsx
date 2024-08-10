@@ -9,28 +9,35 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
+  ClickAwayListener,
 } from "@mui/material";
 import {
-  Search,
-  Message,
   DarkMode,
   LightMode,
+  Message,
   Notifications,
   Help,
   Menu,
   Close,
+  Search,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
+import SearchPage from "./SearchPage"; // Ensure correct path
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
+  const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const token = useSelector((state) => state.token); // Ensure token is used or remove
+  const isNonMobileScreens = useMediaQuery("(min-width: 700px)");
 
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
@@ -40,6 +47,17 @@ const Navbar = () => {
   const alt = theme.palette.background.alt;
 
   const fullName = `${user.firstName} ${user.lastName}`;
+
+  const handleSearchClick = () => {
+    setIsSearchBarVisible(true);
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+    if (e.target.value.length > 0 && !isSearchBarVisible) {
+      setIsSearchBarVisible(true);
+    }
+  };
 
   return (
     <FlexBetween
@@ -62,22 +80,71 @@ const Navbar = () => {
         >
           GoSocial
         </Typography>
-        {isNonMobileScreens && (
-          <FlexBetween
-            backgroundColor={neutralLight}
-            borderRadius="9px"
-            gap="3rem"
-            padding="0.1rem 1.5rem"
-          >
-            <InputBase placeholder="Search..." />
-            <IconButton>
-              <Search />
-            </IconButton>
-          </FlexBetween>
-        )}
+        <Box position="relative">
+          {isNonMobileScreens ? (
+            <FlexBetween
+              backgroundColor={neutralLight}
+              borderRadius="9px"
+              gap="1rem"
+              padding="0.1rem 1.5rem"
+              sx={{ width: "300px" }}
+            >
+              <InputBase
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                onClick={handleSearchClick}
+                sx={{ width: "100%" }}
+              />
+              <IconButton onClick={handleSearchClick}>
+                <Search />
+              </IconButton>
+            </FlexBetween>
+          ) : (
+            <>
+              <IconButton onClick={handleSearchClick}>
+                <Search />
+              </IconButton>
+              {isSearchBarVisible && (
+                <ClickAwayListener
+                  onClickAway={() => setIsSearchBarVisible(false)}
+                >
+                  <Box
+                    position="fixed"
+                    top="4rem" // Positioning below the navbar
+                    left="10%"
+                    backgroundColor={neutralLight}
+                    padding="0.5rem"
+                    zIndex="30"
+                    sx={{
+                      width: "80vw", // Width set to 80% of the viewport
+                      boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <InputBase
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={handleSearchInputChange}
+                      sx={{ width: "100%", marginBottom: "0.5rem" }}
+                    />
+                    <SearchPage
+                      searchQuery={searchQuery}
+                      setSearchQuery={setSearchQuery}
+                      searchResults={searchResults}
+                      setSearchResults={setSearchResults}
+                      onSearchResultClick={(id) => {
+                        navigate(`/profile/${id}`);
+                        setIsSearchBarVisible(false);
+                      }}
+                    />
+                  </Box>
+                </ClickAwayListener>
+              )}
+            </>
+          )}
+        </Box>
       </FlexBetween>
 
-      {/* DESKTOP NAV */}
       {isNonMobileScreens ? (
         <FlexBetween gap="2rem">
           <IconButton onClick={() => dispatch(setMode())}>
@@ -123,7 +190,6 @@ const Navbar = () => {
         </IconButton>
       )}
 
-      {/* MOBILE NAV */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
           position="fixed"
@@ -132,10 +198,9 @@ const Navbar = () => {
           height="100%"
           zIndex="10"
           maxWidth="500px"
-          minWidth="300px"
+          minWidth="80%"
           backgroundColor={background}
         >
-          {/* CLOSE ICON */}
           <Box display="flex" justifyContent="flex-end" p="1rem">
             <IconButton
               onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
@@ -144,7 +209,6 @@ const Navbar = () => {
             </IconButton>
           </Box>
 
-          {/* MENU ITEMS */}
           <FlexBetween
             display="flex"
             flexDirection="column"
@@ -157,9 +221,9 @@ const Navbar = () => {
               sx={{ fontSize: "25px" }}
             >
               {theme.palette.mode === "dark" ? (
-                <DarkMode sx={{ fontSize: "25px" }} />
+                <DarkMode />
               ) : (
-                <LightMode sx={{ color: dark, fontSize: "25px" }} />
+                <LightMode sx={{ color: dark }} />
               )}
             </IconButton>
             <Message sx={{ fontSize: "25px" }} />

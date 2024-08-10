@@ -11,6 +11,32 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getUsersByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    // Check if the query parameter is provided
+    if (!name) {
+      return res
+        .status(400)
+        .json({ message: "Name query parameter is required." });
+    }
+
+    // Use a regular expression to perform a case-insensitive search
+    const regex = new RegExp(name, "i");
+
+    // Find users by first name or last name matching the regex
+    const users = await User.find({
+      $or: [{ firstName: { $regex: regex } }, { lastName: { $regex: regex } }],
+    });
+
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("Error in getUsersByName:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const getUserFriends = async (req, res) => {
   try {
     const { id } = req.params;
