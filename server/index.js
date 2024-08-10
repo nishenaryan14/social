@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
+import chatRoutes from "./routes/chats.js";
 import { register } from "./controllers/auth.js";
 import { createPost } from "./controllers/posts.js";
 import { verifyToken } from "./middleware/auth.js";
@@ -85,7 +86,6 @@ app.post("/auth/register", upload.single("picturePath"), async (req, res) => {
 });
 
 // CREATE POST WITH FILE UPLOAD
-// CREATE POST WITH FILE UPLOAD
 app.post(
   "/posts",
   verifyToken,
@@ -107,6 +107,7 @@ app.post(
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
+app.use("/chats", chatRoutes);
 
 const PORT = process.env.PORT || 6001;
 

@@ -8,6 +8,7 @@ import {
 import HomePage from "scenes/homePage";
 import LoginPage from "scenes/loginPage";
 import ProfilePage from "scenes/profilePage";
+import ChatPage from "scenes/chat/ChatPage"; // Import the new chat page
 import { useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, LinearProgress } from "@mui/material";
@@ -22,15 +23,11 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Start loading when the location changes
     setLoading(true);
-
-    // Simulate a delay to demonstrate the loader (this could be an actual network request)
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 500); // Adjust this timeout as needed
+    }, 500);
 
-    // Cleanup timer on unmount
     return () => clearTimeout(timer);
   }, [location]);
 
@@ -38,7 +35,7 @@ function App() {
     <div className="app">
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {loading && <LinearProgress />} {/* Display the loader if loading */}
+        {loading && <LinearProgress />}
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route
@@ -48,6 +45,10 @@ function App() {
           <Route
             path="/profile/:userId"
             element={isAuth ? <ProfilePage /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/chat"
+            element={isAuth ? <ChatPage /> : <Navigate to="/" />}
           />
         </Routes>
       </ThemeProvider>
