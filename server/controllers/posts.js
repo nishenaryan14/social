@@ -35,10 +35,31 @@ export const createPost = async (req, res) => {
 };
 
 /* READ */
+// export const getFeedPosts = async (req, res) => {
+//   try {
+//     // Retrieve all posts sorted by createdAt in descending order
+//     const posts = await Post.find().sort({ createdAt: -1 });
+//     res.status(200).json(posts);
+//   } catch (err) {
+//     res.status(404).json({ message: err.message });
+//   }
+// };
+
 export const getFeedPosts = async (req, res) => {
   try {
-    // Retrieve all posts sorted by createdAt in descending order
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const userId = req.user.id; // Assuming req.user contains the authenticated user's ID
+    const user = await User.findById(userId);
+
+    // Include the user's own posts and their friends' posts
+    const friendIds = user.friends;
+
+    // Find posts where the `userId` matches the current user or any of their friends
+    const posts = await Post.find({
+      userId: { $in: [userId, ...friendIds] },
+    }).sort({
+      createdAt: -1,
+    });
+
     res.status(200).json(posts);
   } catch (err) {
     res.status(404).json({ message: err.message });
