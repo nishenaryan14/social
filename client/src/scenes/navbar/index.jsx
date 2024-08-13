@@ -99,6 +99,36 @@ const Navbar = () => {
               <IconButton onClick={handleSearchClick}>
                 <Search />
               </IconButton>
+
+              {/* Display SearchPage when search results are available */}
+              {isSearchBarVisible && searchResults.length > 0 && (
+                <ClickAwayListener
+                  onClickAway={() => setIsSearchBarVisible(false)}
+                >
+                  <Box
+                    position="absolute"
+                    top="3.5rem"
+                    left="0"
+                    width="100%"
+                    backgroundColor={neutralLight}
+                    zIndex="30"
+                    sx={{
+                      boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <SearchPage
+                      searchQuery={searchQuery}
+                      setSearchQuery={setSearchQuery}
+                      searchResults={searchResults}
+                      setSearchResults={setSearchResults}
+                      onSearchResultClick={(id) => {
+                        navigate(`/profile/${id}`);
+                        setIsSearchBarVisible(false);
+                      }}
+                    />
+                  </Box>
+                </ClickAwayListener>
+              )}
             </FlexBetween>
           ) : (
             <>
