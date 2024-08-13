@@ -4,6 +4,7 @@ import {
   FavoriteOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
+import "../../index.css";
 import {
   Box,
   Divider,
@@ -21,7 +22,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
 import { useInView } from "react-intersection-observer";
-import EmojiPicker from "emoji-picker-react";
+import { CommentWidget } from "./CommentWidget";
 
 const PostWidget = ({
   postId,
@@ -39,6 +40,7 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [heartVisible, setHeartVisible] = useState(false); // State for heart visibility
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -68,15 +70,14 @@ const PostWidget = ({
     );
     const updatedPost = await response.json();
     dispatch(setPost({ post: updatedPost }));
+
+    // Trigger heart animation
+    setHeartVisible(true);
+    setTimeout(() => setHeartVisible(false), 1000); // Hide heart after 1 second
   };
 
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
-  };
-
-  const handleEmojiClick = (event, emojiObject) => {
-    setNewComment((prevComment) => prevComment + emojiObject.emoji);
-    setShowEmojiPicker(false);
   };
 
   const handleCommentSubmit = async () => {
@@ -141,15 +142,43 @@ const PostWidget = ({
             {description}
           </Typography>
           {picturePath && (
-            <img
-              ref={imageRef}
-              width="100%"
-              height="auto"
-              alt="post"
-              style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-              src={inView ? picturePath : undefined}
-              loading="lazy"
-            />
+            <Box position="relative">
+              <img
+                ref={imageRef}
+                width="100%"
+                height="auto"
+                alt="post"
+                style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
+                src={inView ? picturePath : undefined}
+                onDoubleClick={patchLike}
+                loading="lazy"
+              />
+              {heartVisible && isLiked && (
+                <Box
+                  position="absolute"
+                  top="50%"
+                  left="50%"
+                  sx={{
+                    transform: "translate(-50%, -50%)",
+                    width: "80px",
+                    height: "80px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10,
+                    pointerEvents: "none",
+                  }}
+                >
+                  <FavoriteOutlined
+                    sx={{
+                      color: primary,
+                      fontSize: "3rem",
+                      animation: "pulse 1s ease-out",
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
           )}
           <FlexBetween mt="0.25rem">
             <FlexBetween gap="1rem">
@@ -161,14 +190,17 @@ const PostWidget = ({
                     <FavoriteBorderOutlined />
                   )}
                 </IconButton>
-                <Typography>{likeCount}</Typography>
+                <Typography>{likeCount} likes</Typography>
               </FlexBetween>
 
               <FlexBetween gap="0.3rem">
                 <IconButton onClick={() => setIsComments(!isComments)}>
                   <ChatBubbleOutlineOutlined />
                 </IconButton>
-                <Typography>{comments.length}</Typography>
+                <Typography>
+                  {comments.length}{" "}
+                  {comments.length < 2 ? "comment" : "comments"}
+                </Typography>
               </FlexBetween>
             </FlexBetween>
 
@@ -177,63 +209,14 @@ const PostWidget = ({
             </IconButton>
           </FlexBetween>
           {isComments && (
-            <Box mt="0.5rem">
-              {comments.map((comment, i) => (
-                <Box key={`${comment.userId}-${i}`} sx={{ mb: "0.5rem" }}>
-                  <Divider />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      p: "0.5rem 1rem",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: primary,
-                        fontWeight: "bold",
-                        mr: "0.5rem",
-                      }}
-                    >
-                      {comment.userName}
-                    </Typography>
-                    <Typography sx={{ color: main, lineHeight: 1.5 }}>
-                      {comment.text}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
-              <Divider />
-              <Box mt="1rem" display="flex" gap="1rem" alignItems="center">
-                <TextField
-                  variant="outlined"
-                  placeholder="Add a comment..."
-                  fullWidth
-                  size="small"
-                  value={newComment}
-                  onChange={handleCommentChange}
-                />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  😊
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleCommentSubmit}
-                >
-                  Post
-                </Button>
-              </Box>
-              {showEmojiPicker && (
-                <Box mt="1rem">
-                  <EmojiPicker onEmojiClick={handleEmojiClick} />
-                </Box>
-              )}
-            </Box>
+            <CommentWidget
+              comments={comments}
+              newComment={newComment}
+              handleCommentChange={handleCommentChange}
+              handleCommentSubmit={handleCommentSubmit}
+              showEmojiPicker={showEmojiPicker}
+              setShowEmojiPicker={setShowEmojiPicker}
+            />
           )}
         </>
       )}
