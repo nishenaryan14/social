@@ -1,3 +1,4 @@
+import React, { useMemo, useState, useEffect } from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -7,14 +8,13 @@ import {
 } from "react-router-dom";
 import HomePage from "scenes/homePage";
 import LoginPage from "scenes/loginPage";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import ProfilePage from "scenes/profilePage";
-import { useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { CssBaseline, ThemeProvider, LinearProgress } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { themeSettings } from "./theme";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const mode = useSelector((state) => state.mode);
@@ -24,15 +24,8 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Start loading when the location changes
     setLoading(true);
-
-    // Simulate a delay to demonstrate the loader (this could be an actual network request)
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500); // Adjust this timeout as needed
-
-    // Cleanup timer on unmount
+    const timer = setTimeout(() => setLoading(false), 500); // Simulate loading
     return () => clearTimeout(timer);
   }, [location]);
 
@@ -40,7 +33,8 @@ function App() {
     <div className="app">
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {loading && <LinearProgress />} {/* Display the loader if loading */}
+        {loading && <LinearProgress />}{" "}
+        {/* Show loading bar during navigation */}
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route
@@ -54,13 +48,10 @@ function App() {
         </Routes>
       </ThemeProvider>
       <ToastContainer
-        position="top-center" // Position toast in the top center
-        autoClose={5000} // Duration to show the toast
+        position="top-center"
+        autoClose={5000}
         hideProgressBar={false}
-        newestOnTop={false}
         closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
         draggable
         pauseOnHover
       />

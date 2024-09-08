@@ -40,7 +40,7 @@ const PostWidget = ({
   const [isComments, setIsComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [heartVisible, setHeartVisible] = useState(false); // State for heart visibility
+  const [heartVisible, setHeartVisible] = useState(false);
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
