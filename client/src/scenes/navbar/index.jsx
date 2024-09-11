@@ -36,7 +36,6 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token); // Ensure token is used or remove
   const isNonMobileScreens = useMediaQuery("(min-width: 700px)");
 
   const theme = useTheme();
@@ -101,7 +100,7 @@ const Navbar = () => {
               </IconButton>
 
               {/* Display SearchPage when search results are available */}
-              {isSearchBarVisible && searchResults.length > 0 && (
+              {isSearchBarVisible && (
                 <ClickAwayListener
                   onClickAway={() => setIsSearchBarVisible(false)}
                 >
@@ -187,7 +186,12 @@ const Navbar = () => {
               <LightMode sx={{ color: dark, fontSize: "25px" }} />
             )}
           </IconButton>
-          <Message sx={{ fontSize: "25px" }} />
+          <IconButton
+            sx={{ fontSize: "25px", cursor: "pointer" }}
+            onClick={() => navigate("/chat")}
+          >
+            <Message />
+          </IconButton>
           <Notifications sx={{ fontSize: "25px" }} />
           <Help sx={{ fontSize: "25px" }} />
           <FormControl variant="standard" value={fullName}>
@@ -259,7 +263,12 @@ const Navbar = () => {
                 <LightMode sx={{ color: dark }} />
               )}
             </IconButton>
-            <Message sx={{ fontSize: "25px" }} />
+            <IconButton
+              sx={{ fontSize: "25px", cursor: "pointer" }}
+              onClick={() => navigate("/chat")}
+            >
+              <Message />
+            </IconButton>
             <Notifications sx={{ fontSize: "25px" }} />
             <Help sx={{ fontSize: "25px" }} />
             <FormControl variant="standard" value={fullName}>
