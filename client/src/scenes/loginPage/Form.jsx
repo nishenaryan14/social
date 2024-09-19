@@ -101,7 +101,8 @@ const Form = () => {
       }
 
       const response = await fetch(
-        "https://social-ty3k.onrender.com/auth/register",
+        // "https://social-ty3k.onrender.com/auth/register",
+        "http://localhost:3001/auth/register",
         {
           method: "POST",
           body: formData,
@@ -136,7 +137,8 @@ const Form = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://social-ty3k.onrender.com/auth/login",
+        // "https://social-ty3k.onrender.com/auth/login",
+        "http://localhost:3001/auth/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

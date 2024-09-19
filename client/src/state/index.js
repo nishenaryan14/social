@@ -5,6 +5,7 @@ const initialState = {
   user: null,
   token: null,
   posts: [],
+  conversations: [], // Add conversations state
 };
 
 export const authSlice = createSlice({
@@ -39,9 +40,20 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    setConversations: (state, action) => {
+      state.conversations = action.payload.conversations; // Add logic to set conversations
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
-  authSlice.actions;
+export const {
+  setMode,
+  setLogin,
+  setLogout,
+  setFriends,
+  setPosts,
+  setPost,
+  setConversations, // Export setConversations
+} = authSlice.actions;
+
 export default authSlice.reducer;

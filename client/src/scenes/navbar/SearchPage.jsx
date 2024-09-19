@@ -48,6 +48,7 @@ const SearchPage = ({
           if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`); // Error handling
           }
+          console.log(token);
           const data = await response.json();
           setSearchResults(data); // Update the search results state
         } catch (error) {

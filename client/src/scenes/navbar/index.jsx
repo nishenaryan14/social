@@ -26,18 +26,19 @@ import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 import SearchPage from "./SearchPage"; // Ensure correct path
+import ChatAnimation from "../../components/ChatAnimation"; // Adjust the path as necessary
 
 const Navbar = () => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [showChatAnimation, setShowChatAnimation] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
   const isNonMobileScreens = useMediaQuery("(min-width: 700px)");
-
   const theme = useTheme();
   const neutralLight = theme.palette.neutral.light;
   const dark = theme.palette.neutral.dark;
@@ -56,6 +57,10 @@ const Navbar = () => {
     if (e.target.value.length > 0 && !isSearchBarVisible) {
       setIsSearchBarVisible(true);
     }
+  };
+
+  const handleChatIconClick = () => {
+    setShowChatAnimation(true);
   };
 
   return (
@@ -99,7 +104,6 @@ const Navbar = () => {
                 <Search />
               </IconButton>
 
-              {/* Display SearchPage when search results are available */}
               {isSearchBarVisible && (
                 <ClickAwayListener
                   onClickAway={() => setIsSearchBarVisible(false)}
@@ -140,17 +144,17 @@ const Navbar = () => {
                 >
                   <Box
                     position="fixed"
-                    top="4rem" // Positioning below the navbar
+                    top="4rem"
                     left="10%"
                     backgroundColor={neutralLight}
                     padding="0.5rem"
                     zIndex="30"
                     sx={{
-                      width: "80vw", // Width set to 80% of the viewport
+                      width: "80vw",
                       boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
                       ...(isNonMobileScreens
-                        ? {} // No changes for non-mobile screens
-                        : { width: "100vw", left: "0" }), // Full width on mobile screens
+                        ? {}
+                        : { width: "100vw", left: "0" }),
                     }}
                   >
                     <InputBase
@@ -188,7 +192,7 @@ const Navbar = () => {
           </IconButton>
           <IconButton
             sx={{ fontSize: "25px", cursor: "pointer" }}
-            onClick={() => navigate("/chat")}
+            onClick={handleChatIconClick}
           >
             <Message />
           </IconButton>
@@ -227,6 +231,14 @@ const Navbar = () => {
         </IconButton>
       )}
 
+      {/* Chat Animation */}
+      <ChatAnimation
+        isVisible={showChatAnimation}
+        onClose={() => setShowChatAnimation(false)}
+        onAnimationComplete={() => navigate("/chat")}
+      />
+
+      {/* Mobile menu */}
       {!isNonMobileScreens && isMobileMenuToggled && (
         <Box
           position="fixed"
@@ -235,69 +247,60 @@ const Navbar = () => {
           height="100%"
           zIndex="10"
           maxWidth="500px"
-          minWidth="80%"
-          backgroundColor={background}
+          minWidth="200px"
+          bgcolor={background}
+          sx={{
+            boxShadow: "0px 0px 15px rgba(0,0,0,0.3)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2rem",
+            padding: "1rem",
+          }}
         >
-          <Box display="flex" justifyContent="flex-end" p="1rem">
-            <IconButton
-              onClick={() => setIsMobileMenuToggled(!isMobileMenuToggled)}
-            >
-              <Close />
-            </IconButton>
-          </Box>
-
-          <FlexBetween
-            display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            alignItems="center"
-            gap="3rem"
-          >
-            <IconButton
-              onClick={() => dispatch(setMode())}
-              sx={{ fontSize: "25px" }}
-            >
+          <IconButton onClick={() => setIsMobileMenuToggled(false)}>
+            <Close />
+          </IconButton>
+          <FlexBetween>
+            <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
-                <DarkMode />
+                <DarkMode sx={{ fontSize: "25px" }} />
               ) : (
-                <LightMode sx={{ color: dark }} />
+                <LightMode sx={{ color: dark, fontSize: "25px" }} />
               )}
             </IconButton>
             <IconButton
               sx={{ fontSize: "25px", cursor: "pointer" }}
-              onClick={() => navigate("/chat")}
+              onClick={handleChatIconClick}
             >
               <Message />
             </IconButton>
             <Notifications sx={{ fontSize: "25px" }} />
             <Help sx={{ fontSize: "25px" }} />
-            <FormControl variant="standard" value={fullName}>
-              <Select
-                value={fullName}
-                sx={{
-                  backgroundColor: neutralLight,
-                  width: "150px",
-                  borderRadius: "0.25rem",
-                  p: "0.25rem 1rem",
-                  "& .MuiSvgIcon-root": {
-                    pr: "0.25rem",
-                    width: "3rem",
-                  },
-                  "& .MuiSelect-select:focus": {
-                    backgroundColor: neutralLight,
-                  },
-                }}
-                input={<InputBase />}
-              >
-                <MenuItem value={fullName}>
-                  <Typography>{fullName}</Typography>
-                </MenuItem>
-                <MenuItem onClick={() => dispatch(setLogout())}>
-                  Log Out
-                </MenuItem>
-              </Select>
-            </FormControl>
           </FlexBetween>
+          <FormControl variant="standard" value={fullName}>
+            <Select
+              value={fullName}
+              sx={{
+                backgroundColor: neutralLight,
+                width: "150px",
+                borderRadius: "0.25rem",
+                p: "0.25rem 1rem",
+                "& .MuiSvgIcon-root": {
+                  pr: "0.25rem",
+                  width: "3rem",
+                },
+                "& .MuiSelect-select:focus": {
+                  backgroundColor: neutralLight,
+                },
+              }}
+              input={<InputBase />}
+            >
+              <MenuItem value={fullName}>
+                <Typography>{fullName}</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => dispatch(setLogout())}>Log Out</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       )}
     </FlexBetween>
