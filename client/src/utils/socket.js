@@ -6,7 +6,7 @@ const useSocket = (token) => {
 
   useEffect(() => {
     if (token) {
-      const newSocket = io("http://localhost:3001", {
+      const newSocket = io("https://social-ty3k.onrender.com", {
         query: { token },
       });
       setSocket(newSocket);
