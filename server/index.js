@@ -52,7 +52,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://social-ty3k.onrender.com", // Replace with your client origin
+    origin: "https://social-gray-kappa.vercel.app/", // Replace with your client origin
     methods: ["GET", "POST"],
     allowedHeaders: ["my-custom-header"],
     credentials: true,
