@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -8,13 +10,16 @@ import { S3Client } from "@aws-sdk/client-s3";
 import compression from "compression";
 import path from "path";
 import { fileURLToPath } from "url";
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import chatRoutes from "./routes/chat.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import postRoutes from "./routes/posts.js";
 import { register } from "./controllers/auth.js";
 import { createPost } from "./controllers/posts.js";
-import { verifyToken } from "./middleware/auth.js";
-import mongoose from "mongoose";
+import { verifyToken } from "./middleware/verifyToken.js";
+import socketSetup from "./socket.js"; // Import Socket setup
 
 // Load environment variables
 dotenv.config();
@@ -32,21 +37,27 @@ const s3Client = new S3Client({
   },
 });
 
-// Configure multer to use multer-s3 for file uploads
+// Multer S3 file upload setup
 const upload = multer({
   storage: multerS3({
     s3: s3Client,
     bucket: process.env.BUCKET_NAME,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      cb(null, `uploads/${Date.now()}_${file.originalname}`); // Unique file name
-    },
+    metadata: (req, file, cb) => cb(null, { fieldName: file.fieldname }),
+    key: (req, file, cb) =>
+      cb(null, `uploads/${Date.now()}_${file.originalname}`),
   }),
 });
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your client origin
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    credentials: true,
+  },
+});
 
 // Middleware
 app.use(express.json());
@@ -56,68 +67,52 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(compression());
 app.use(express.static(path.join(__dirname, "public/images")));
 
-// AWS S3 File Upload Route
+// Routes
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/posts", postRoutes);
+app.use("/chats", chatRoutes);
+
+// S3 File Upload Route
 app.post("/upload", upload.single("file"), (req, res) => {
   try {
-    const imageUrl = req.file.location; // URL of the uploaded file
-    res.status(200).json({ imageUrl });
+    res.status(200).json({ imageUrl: req.file.location });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// AUTH REGISTER WITH FILE UPLOAD
+// AUTH Register with File Upload
 app.post("/auth/register", upload.single("picturePath"), async (req, res) => {
   try {
-    if (req.file) {
-      console.log("File uploaded:", req.file);
-    } else {
-      console.error("File upload error");
-    }
-
-    // Call the register function
     await register(req, res);
-  } catch (err) {
-    console.error("Error during registration:", err);
+  } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// CREATE POST WITH FILE UPLOAD
-// CREATE POST WITH FILE UPLOAD
+// CREATE Post with File Upload
 app.post(
   "/posts",
   verifyToken,
   upload.single("picturePath"),
   (req, res, next) => {
-    console.log("Incoming request:", req.body);
-    if (req.file) {
-      console.log("File uploaded:", req.file);
-    } else {
-      console.error("File upload error");
-      return res.status(400).send("File upload error");
-    }
     next();
   },
-  createPost // Pass req and res directly to the createPost controller
+  createPost
 );
 
-// ROUTES
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/posts", postRoutes);
+// Initialize socket.io with the server
+socketSetup(io);
 
+// MongoDB connection and Server start
 const PORT = process.env.PORT || 6001;
-
-// Connect to MongoDB and start server
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
-  .catch((error) => console.error(`MongoDB connection error: ${error}`));
+  .catch((error) => console.log(`${error} did not connect`));

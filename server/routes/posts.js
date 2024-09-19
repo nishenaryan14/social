@@ -5,7 +5,7 @@ import {
   likePost,
   addComment,
 } from "../controllers/posts.js";
-import { verifyToken } from "../middleware/auth.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 

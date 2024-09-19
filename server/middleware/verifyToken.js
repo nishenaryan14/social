@@ -5,7 +5,9 @@ export const verifyToken = async (req, res, next) => {
     let token = req.header("Authorization");
 
     if (!token) {
-      return res.status(403).send("Access Denied");
+      return res
+        .status(403)
+        .json({ error: "Access Denied: No token provided" });
     }
 
     if (token.startsWith("Bearer ")) {
@@ -13,9 +15,14 @@ export const verifyToken = async (req, res, next) => {
     }
 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
+    req.user = verified; // Ensure req.user contains user details
+
+    // Debugging log
+    console.log("Verified User:", req.user);
+
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Token verification error:", err.message);
+    res.status(500).json({ error: "Failed to authenticate token" });
   }
 };
