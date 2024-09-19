@@ -38,7 +38,6 @@ const UserWidget = ({ userId, picturePath }) => {
       }
     );
     const data = await response.json();
-    console.log(token);
     setUser(data);
   };
 
