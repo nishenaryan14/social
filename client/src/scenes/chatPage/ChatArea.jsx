@@ -13,6 +13,7 @@ import {
   Toolbar,
   useTheme,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AttachmentIcon from "@mui/icons-material/Attachment";
@@ -31,7 +32,7 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
   const neutralLight = theme.palette.neutral.light;
   const primaryLight = theme.palette.primary.dark;
   const background = theme.palette.background.default;
-
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   useEffect(() => {
     const fetchMessages = async () => {
       if (selectedChat) {
@@ -140,7 +141,8 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
     <Box
       display="flex"
       flexDirection="column"
-      height="100vh" // Ensure the ChatArea takes full height
+      width={isMobile ? "100vw" : "calc(100vw - 390px)"}
+      height="100vh"
     >
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar>

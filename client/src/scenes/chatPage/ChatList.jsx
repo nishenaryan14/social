@@ -13,6 +13,7 @@ import {
   ClickAwayListener,
   useTheme,
   Divider,
+  useMediaQuery,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import SearchIcon from "@mui/icons-material/Search";
@@ -31,6 +32,7 @@ const ChatList = ({
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const handleSearchInputChange = async (e) => {
     setSearchQuery(e.target.value);
     if (e.target.value.length > 0) {
@@ -67,7 +69,7 @@ const ChatList = ({
 
   return (
     <Box
-      width="300px"
+      width={isMobile ? "100vw" : "390px"}
       height="100vh"
       borderRight="1px solid #ddd"
       sx={{ overflowY: "scroll" }}

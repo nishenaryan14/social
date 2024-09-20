@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { setConversations } from "../../state";
 import ChatList from "./ChatList";
@@ -7,6 +7,7 @@ import ChatArea from "./ChatArea";
 import UserDetailsPage from "./UserDetailsPage";
 import useSocket from "../../utils/socket";
 import ChatSearchPage from "./SearchPage";
+import { useTheme } from "@mui/material/styles";
 
 const ChatPage = () => {
   const dispatch = useDispatch();
@@ -17,6 +18,10 @@ const ChatPage = () => {
   const token = useSelector((state) => state.token);
   const conversations = useSelector((state) => state.conversations);
   const socket = useSocket(token);
+  const theme = useTheme();
+
+  // Use useMediaQuery to detect if it's mobile
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // 'sm' is 600px by default
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -53,7 +58,6 @@ const ChatPage = () => {
         if (!response.ok) throw new Error("Failed to create conversation");
         const data = await response.json();
         setSelectedChat(data);
-        console.log(data);
         setUserDetails(null);
         fetchConversations();
       } catch (error) {
@@ -70,12 +74,10 @@ const ChatPage = () => {
     setUserDetails(user);
   };
 
-  // Listen for real-time updates via socket
   useEffect(() => {
     fetchConversations();
     if (socket) {
       socket.on("message", (message) => {
-        // Update conversation with the latest message
         dispatch(
           setConversations((prevConversations) =>
             prevConversations.map((chat) =>
@@ -89,7 +91,6 @@ const ChatPage = () => {
 
       // Listen for a new conversation
       socket.on("newConversation", (conversation) => {
-        // Add new conversation to the list
         dispatch(
           setConversations((prevConversations) => [
             ...prevConversations,
@@ -98,14 +99,9 @@ const ChatPage = () => {
         );
       });
 
-      socket.on("disconnect", () => {
-        console.log("Socket disconnected");
-      });
-
       return () => {
         socket.off("message"); // Clean up the event listener
         socket.off("newConversation");
-        socket.off("disconnect");
       };
     }
   }, [fetchConversations, socket, dispatch]);
@@ -113,47 +109,66 @@ const ChatPage = () => {
   const handleSearchClick = () => {
     setShowSearch(true);
   };
+
   const onBack = () => {
     setSelectedChat(null);
   };
 
   return (
-    <>
-      <Box display="flex" overflow="hidden">
-        {showSearch && (
-          <ChatSearchPage onSearchResultClick={handleUserSelect} />
-        )}
-        <ChatList
-          conversations={conversations}
-          onSelectChat={setSelectedChat}
-          onViewUserDetails={handleViewUserDetails}
-          selectedChat={selectedChat}
-          onSearchUser={handleUserSelect}
-          onSearchClick={handleSearchClick}
-        />
-        <Box flexGrow={1} display="flex" flexDirection="column">
-          {selectedChat ? (
+    <Box display="flex" overflow="hidden" height="100vh">
+      {isMobile ? (
+        <>
+          {!selectedChat ? (
+            <ChatList
+              conversations={conversations}
+              onSelectChat={setSelectedChat}
+              onViewUserDetails={handleViewUserDetails}
+              selectedChat={selectedChat}
+              onSearchUser={handleUserSelect}
+              onSearchClick={handleSearchClick}
+            />
+          ) : (
             <ChatArea
               selectedChat={selectedChat}
               token={token}
               onBack={onBack}
             />
-          ) : (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              flexGrow={1}
-            >
-              <Typography variant="h5">
-                Select a chat to start messaging
-              </Typography>
-            </Box>
           )}
-        </Box>
-        {userDetails && <UserDetailsPage userId={userDetails._id} />}
-      </Box>
-    </>
+        </>
+      ) : (
+        <>
+          <ChatList
+            conversations={conversations}
+            onSelectChat={setSelectedChat}
+            onViewUserDetails={handleViewUserDetails}
+            selectedChat={selectedChat}
+            onSearchUser={handleUserSelect}
+            onSearchClick={handleSearchClick}
+          />
+          <Box flexGrow={1} display="flex" flexDirection="column">
+            {selectedChat ? (
+              <ChatArea
+                selectedChat={selectedChat}
+                token={token}
+                onBack={onBack}
+              />
+            ) : (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexGrow={1}
+              >
+                <Typography variant="h5">
+                  Select a chat to start messaging
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          {userDetails && <UserDetailsPage userId={userDetails._id} />}
+        </>
+      )}
+    </Box>
   );
 };
 
