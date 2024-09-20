@@ -12,11 +12,14 @@ import {
   AppBar,
   Toolbar,
   useTheme,
+  Divider,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AttachmentIcon from "@mui/icons-material/Attachment";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import useSocket from "../../utils/socket";
+import { format, isToday } from "date-fns";
 
 const ChatArea = ({ selectedChat, token, onBack }) => {
   const [messages, setMessages] = useState([]);
@@ -117,6 +120,22 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
     (participant) => participant._id !== userId
   );
 
+  const renderDateDivider = (date) => {
+    if (isToday(new Date(date))) {
+      return (
+        <Divider textAlign="center" color="grey">
+          Today
+        </Divider>
+      );
+    } else {
+      return (
+        <Divider textAlign="center" color="grey">
+          {format(new Date(date), "PPP")}
+        </Divider>
+      );
+    }
+  };
+
   return (
     <Box
       display="flex"
@@ -152,48 +171,59 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
         style={{ backgroundColor: neutralLight }}
       >
         <List>
-          {messages.map((msg) => (
-            <ListItem key={msg._id} alignItems="flex-start">
-              <Box
-                display="flex"
-                alignItems="flex-start"
-                width="100%"
-                justifyContent={
-                  msg.sender._id === userId ? "flex-end" : "flex-start"
-                }
-              >
-                {msg.sender._id !== userId && (
-                  <Avatar
-                    alt={msg.sender?.firstName || "Unknown"}
-                    src={msg.sender?.picturePath || ""}
-                    style={{ marginRight: "10px" }}
-                  />
-                )}
-                <Paper
-                  elevation={2}
-                  style={{
-                    padding: "0.5rem 1rem",
-                    backgroundColor:
-                      msg.sender._id === userId ? "lightblue" : "#ffffff",
-                  }}
-                >
-                  <Typography variant="body2" color="textPrimary">
-                    {msg.content}
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {new Date(msg.createdAt).toLocaleTimeString()}
-                  </Typography>
-                </Paper>
-                {msg.sender._id === userId && (
-                  <Avatar
-                    alt={msg.sender?.firstName || "Unknown"}
-                    src={msg.sender?.picturePath || ""}
-                    style={{ marginLeft: "10px" }}
-                  />
-                )}
-              </Box>
-            </ListItem>
-          ))}
+          {messages.map((msg, index) => {
+            const prevMessage = messages[index - 1];
+            const isNewDay =
+              !prevMessage ||
+              new Date(prevMessage.createdAt).toDateString() !==
+                new Date(msg.createdAt).toDateString();
+
+            return (
+              <React.Fragment key={msg._id}>
+                {isNewDay && renderDateDivider(msg.createdAt)}
+                <ListItem alignItems="flex-start">
+                  <Box
+                    display="flex"
+                    alignItems="flex-start"
+                    width="100%"
+                    justifyContent={
+                      msg.sender._id === userId ? "flex-end" : "flex-start"
+                    }
+                  >
+                    {msg.sender._id !== userId && (
+                      <Avatar
+                        alt={msg.sender?.firstName || "Unknown"}
+                        src={msg.sender?.picturePath || ""}
+                        style={{ marginRight: "10px" }}
+                      />
+                    )}
+                    <Paper
+                      elevation={2}
+                      style={{
+                        padding: "0.5rem 1rem",
+                        backgroundColor:
+                          msg.sender._id === userId ? "lightblue" : "#fff",
+                      }}
+                    >
+                      <Typography variant="body2" color="#000">
+                        {msg.content}
+                      </Typography>
+                      <Typography variant="caption" color="grey">
+                        {new Date(msg.createdAt).toLocaleTimeString()}
+                      </Typography>
+                    </Paper>
+                    {msg.sender._id === userId && (
+                      <Avatar
+                        alt={msg.sender?.firstName || "Unknown"}
+                        src={msg.sender?.picturePath || ""}
+                        style={{ marginLeft: "10px" }}
+                      />
+                    )}
+                  </Box>
+                </ListItem>
+              </React.Fragment>
+            );
+          })}
           <div ref={messagesEndRef} />
         </List>
       </Box>
@@ -212,6 +242,12 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
         boxShadow="0 -1px 10px rgba(0,0,0,0.1)"
         zIndex="1000"
       >
+        <IconButton>
+          <AttachmentIcon
+            sx={{ color: "grey", transform: "rotate(90deg)", fontSize: "25px" }}
+          />
+        </IconButton>
+
         <TextField
           fullWidth
           variant="outlined"

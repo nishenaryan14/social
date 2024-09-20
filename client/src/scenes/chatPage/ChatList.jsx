@@ -12,17 +12,18 @@ import {
   InputBase,
   ClickAwayListener,
   useTheme,
+  Divider,
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import SearchIcon from "@mui/icons-material/Search";
 import SearchPage from "./SearchPage";
-
+import { Message } from "@mui/icons-material";
 const ChatList = ({
   conversations,
   onSelectChat,
   onViewUserDetails,
   selectedChat,
-  onSearchUser, // New prop to handle user search result click
+  onSearchUser,
 }) => {
   const { _id: currentUserId } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
@@ -76,9 +77,15 @@ const ChatList = ({
           <Typography
             variant="h4"
             component="div"
-            sx={{ fontFamily: '"Dancing Script", cursive' }}
+            display="flex"
+            alignItems="center"
+            sx={{
+              fontFamily: '"Dancing Script", cursive',
+              gap: "12px",
+              color: "#161D6F",
+            }}
           >
-            Messenger
+            <Message /> Messenger
           </Typography>
         </Toolbar>
       </AppBar>
@@ -97,7 +104,7 @@ const ChatList = ({
           startAdornment={<SearchIcon />}
         />
       </Box>
-
+      <Divider />
       {isSearchBarVisible && (
         <ClickAwayListener onClickAway={() => setIsSearchBarVisible(false)}>
           <Box position="relative" zIndex="30" backgroundColor="#fff">
@@ -126,34 +133,37 @@ const ChatList = ({
           }
 
           return (
-            <ListItem
-              key={chat._id}
-              button
-              selected={selectedChat?._id === chat._id}
-              onClick={() => handleClick(chat)}
-            >
-              <ListItemAvatar>
-                <Avatar>
-                  {otherParticipant.picturePath ? (
-                    <img
-                      src={otherParticipant.picturePath}
-                      alt={otherParticipant.firstName || "User"}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    otherParticipant.firstName?.charAt(0) || "U"
-                  )}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={otherParticipant.firstName || "Unknown User"}
-                secondary={chat.lastMessage?.content || "No messages yet"}
-              />
-            </ListItem>
+            <>
+              <ListItem
+                key={chat._id}
+                button
+                selected={selectedChat?._id === chat._id}
+                onClick={() => handleClick(chat)}
+              >
+                <ListItemAvatar>
+                  <Avatar>
+                    {otherParticipant.picturePath ? (
+                      <img
+                        src={otherParticipant.picturePath}
+                        alt={otherParticipant.firstName || "User"}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      otherParticipant.firstName?.charAt(0) || "U"
+                    )}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={otherParticipant.firstName || "Unknown User"}
+                  secondary={chat.lastMessage?.content || "No messages yet"}
+                />
+              </ListItem>
+              <Divider />
+            </>
           );
         })}
       </List>
