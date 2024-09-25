@@ -77,6 +77,35 @@ export const getUserPosts = async (req, res) => {
   }
 };
 
+// DELETE POST
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id; // Assuming req.user contains the authenticated user's ID
+
+    // Find the post by ID
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Check if the current user is the post owner or an admin
+    if (post.userId.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this post" });
+    }
+
+    // Delete the post
+    await Post.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (err) {
+    console.error("Error in deletePost:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 /* UPDATE */
 export const likePost = async (req, res) => {
   try {

@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 import SearchIcon from "@mui/icons-material/Search";
 import SearchPage from "./SearchPage";
 import { Message } from "@mui/icons-material";
+
 const ChatList = ({
   conversations,
   onSelectChat,
@@ -33,6 +34,7 @@ const ChatList = ({
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const handleSearchInputChange = async (e) => {
     setSearchQuery(e.target.value);
     if (e.target.value.length > 0) {
@@ -71,8 +73,11 @@ const ChatList = ({
     <Box
       width={isMobile ? "100vw" : "390px"}
       height="100vh"
-      borderRight="1px solid #ddd"
-      sx={{ overflowY: "scroll" }}
+      borderRight={`1px solid ${theme.palette.divider}`}
+      sx={{
+        overflowY: "scroll",
+        backgroundColor: theme.palette.background.paper,
+      }}
     >
       <AppBar position="sticky" color="default" elevation={1}>
         <Toolbar>
@@ -84,10 +89,10 @@ const ChatList = ({
             sx={{
               fontFamily: '"Dancing Script", cursive',
               gap: "12px",
-              color: "#161D6F",
+              color: theme.palette.primary.main,
             }}
           >
-            <Message /> Messenger
+            <Message /> GoMessenger
           </Typography>
         </Toolbar>
       </AppBar>
@@ -101,9 +106,15 @@ const ChatList = ({
             width: "100%",
             padding: "8px",
             borderRadius: "4px",
-            backgroundColor: "neutralLight",
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.1)"
+                : "neutralLight",
+            color: theme.palette.text.primary,
           }}
-          startAdornment={<SearchIcon />}
+          startAdornment={
+            <SearchIcon sx={{ color: theme.palette.text.secondary }} />
+          }
         />
       </Box>
       <Divider />
@@ -135,12 +146,20 @@ const ChatList = ({
           }
 
           return (
-            <>
+            <React.Fragment key={chat._id}>
               <ListItem
-                key={chat._id}
                 button
                 selected={selectedChat?._id === chat._id}
                 onClick={() => handleClick(chat)}
+                sx={{
+                  backgroundColor:
+                    selectedChat?._id === chat._id
+                      ? theme.palette.action.selected
+                      : "transparent",
+                  "&:hover": {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
               >
                 <ListItemAvatar>
                   <Avatar>
@@ -162,10 +181,13 @@ const ChatList = ({
                 <ListItemText
                   primary={otherParticipant.firstName || "Unknown User"}
                   secondary={chat.lastMessage?.content || "No messages yet"}
+                  sx={{
+                    color: theme.palette.text.primary,
+                  }}
                 />
               </ListItem>
               <Divider />
-            </>
+            </React.Fragment>
           );
         })}
       </List>

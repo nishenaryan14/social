@@ -3,6 +3,7 @@ import {
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
+  DeleteOutline,
 } from "@mui/icons-material";
 import "../../index.css";
 import {
@@ -14,15 +15,22 @@ import {
   TextField,
   Button,
   Skeleton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "state";
+import { setPost, removePost } from "state"; // Assuming removePost action exists
 import { useInView } from "react-intersection-observer";
 import { CommentWidget } from "./CommentWidget";
+import { toast } from "react-toastify"; // Import toast
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 const PostWidget = ({
   postId,
@@ -41,6 +49,7 @@ const PostWidget = ({
   const [newComment, setNewComment] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [heartVisible, setHeartVisible] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); // State for dialog
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -56,6 +65,7 @@ const PostWidget = ({
     threshold: 0.1,
   });
 
+  // Patch like function
   const patchLike = async () => {
     const response = await fetch(
       `https://social-ty3k.onrender.com/posts/${postId}/like`,
@@ -76,10 +86,36 @@ const PostWidget = ({
     setTimeout(() => setHeartVisible(false), 1000); // Hide heart after 1 second
   };
 
+  // Delete post logic
+  const handleDeletePost = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
+      }
+
+      // Dispatch action to remove post from state
+      dispatch(removePost({ postId }));
+      toast.success("Post deleted successfully!"); // Success toast
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      toast.error("Failed to delete post!"); // Error toast
+    }
+    setOpenDeleteDialog(false); // Close dialog after deleting
+  };
+
+  // Handle comment input change
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
   };
 
+  // Handle comment submission
   const handleCommentSubmit = async () => {
     try {
       const response = await fetch(
@@ -107,6 +143,16 @@ const PostWidget = ({
     } catch (error) {
       console.error("Error posting comment:", error);
     }
+  };
+
+  // Open delete dialog
+  const handleOpenDeleteDialog = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  // Close delete dialog
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
   };
 
   return (
@@ -204,9 +250,16 @@ const PostWidget = ({
               </FlexBetween>
             </FlexBetween>
 
-            <IconButton>
-              <ShareOutlined />
-            </IconButton>
+            <FlexBetween gap="0.3rem">
+              {postUserId === loggedInUserId && (
+                <IconButton onClick={handleOpenDeleteDialog}>
+                  <DeleteOutline />
+                </IconButton>
+              )}
+              <IconButton>
+                <ShareOutlined />
+              </IconButton>
+            </FlexBetween>
           </FlexBetween>
           {isComments && (
             <CommentWidget
@@ -218,6 +271,29 @@ const PostWidget = ({
               setShowEmojiPicker={setShowEmojiPicker}
             />
           )}
+
+          {/* Delete confirmation dialog */}
+          <Dialog
+            open={openDeleteDialog}
+            onClose={handleCloseDeleteDialog}
+            aria-labelledby="delete-dialog-title"
+          >
+            <DialogTitle id="delete-dialog-title">Delete Post</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete this post? This action cannot be
+                undone.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDeleteDialog} color="primary">
+                Cancel
+              </Button>
+              <Button onClick={handleDeletePost} color="secondary" autoFocus>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </WidgetWrapper>

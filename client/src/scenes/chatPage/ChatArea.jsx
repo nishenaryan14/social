@@ -25,6 +25,7 @@ import { format, isToday } from "date-fns";
 const ChatArea = ({ selectedChat, token, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [attachment, setAttachment] = useState(null);
   const messagesEndRef = useRef(null);
   const { _id: userId } = useSelector((state) => state.user);
   const socket = useSocket(token);
@@ -79,7 +80,7 @@ const ChatArea = ({ selectedChat, token, onBack }) => {
       socket.on("message", handleNewMessage);
 
       return () => {
-        socket.off("message", handleNewMessage); // Clean up listener
+        socket.off("message", handleNewMessage);
       };
     }
   }, [socket, selectedChat]);

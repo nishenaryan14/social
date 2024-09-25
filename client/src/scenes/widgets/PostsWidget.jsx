@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
 import PostWidget from "./PostWidget";
 import MakeFirstPost from "components/MakeFirstPost";
+import { Box } from "@mui/material"; // Import Box from MUI
 
 const PostsWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
@@ -11,14 +12,10 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   const { _id: loggedInUserId } = useSelector((state) => state.user);
 
   const getPosts = async () => {
-    const response = await fetch(
-      "https://social-ty3k.onrender.com/posts",
-      // "http://localhost:3001/posts",
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const response = await fetch("https://social-ty3k.onrender.com/posts", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     const data = await response.json();
     dispatch(setPosts({ posts: data }));
   };
@@ -75,13 +72,17 @@ const PostsWidget = ({ userId, isProfile = false }) => {
           )
         )
       ) : (
-        // Determine if the user viewing the profile is the logged-in user
-        <MakeFirstPost
-          onCreate={() => {
-            // logic to open the create post modal or form
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "50vh",
+            width: "100%",
           }}
-          isLoggedInUser={loggedInUserId === userId}
-        />
+        >
+          <MakeFirstPost isLoggedInUser={loggedInUserId === userId} />
+        </Box>
       )}
     </>
   );
