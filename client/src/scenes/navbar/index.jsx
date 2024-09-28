@@ -69,7 +69,12 @@ const Navbar = () => {
       backgroundColor={alt}
       sx={{ position: "fixed", top: "0", left: "0", right: "0", zIndex: "20" }}
     >
-      <FlexBetween gap="1.75rem">
+      <FlexBetween
+        gap="1.75rem"
+        sx={{
+          ...(isNonMobileScreens ? {} : { width: "296px" }),
+        }}
+      >
         <Typography
           fontWeight="bold"
           fontSize="clamp(1rem, 2rem, 2.25rem)"
@@ -135,7 +140,7 @@ const Navbar = () => {
             </FlexBetween>
           ) : (
             <>
-              <IconButton onClick={handleSearchClick}>
+              <IconButton onClick={handleSearchClick} sx={{ fontSize: "25px" }}>
                 <Search />
               </IconButton>
               {isSearchBarVisible && (
