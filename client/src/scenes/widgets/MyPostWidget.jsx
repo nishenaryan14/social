@@ -39,6 +39,7 @@ const MyPostWidget = ({ picturePath }) => {
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width: 1000px)");
+  const isSmallScreen = useMediaQuery("(max-width: 400px)");
   const mediumMain = palette.neutral.mediumMain;
   const medium = palette.neutral.medium;
 
@@ -139,7 +140,10 @@ const MyPostWidget = ({ picturePath }) => {
                   {image && (
                     <IconButton
                       onClick={() => setImage(null)}
-                      sx={{ width: "15%" }}
+                      sx={{
+                        width: isSmallScreen ? "10%" : "15%",
+                        alignSelf: isSmallScreen ? "center" : "flex-start",
+                      }}
                     >
                       <DeleteOutlined />
                     </IconButton>
