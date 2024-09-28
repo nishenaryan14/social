@@ -112,6 +112,7 @@ const MyPostWidget = ({ picturePath }) => {
             borderRadius="5px"
             mt="1rem"
             p="1rem"
+            width={isNonMobileScreens ? "80%" : "100%"}
           >
             <Dropzone
               acceptedFiles=".jpg,.jpeg,.png"
@@ -141,8 +142,8 @@ const MyPostWidget = ({ picturePath }) => {
                     <IconButton
                       onClick={() => setImage(null)}
                       sx={{
-                        width: isSmallScreen ? "10%" : "15%",
-                        alignSelf: isSmallScreen ? "center" : "flex-start",
+                        width: "15%",
+                        alignSelf: "center",
                       }}
                     >
                       <DeleteOutlined />
