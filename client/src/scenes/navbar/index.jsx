@@ -260,7 +260,7 @@ const Navbar = () => {
           <IconButton onClick={() => setIsMobileMenuToggled(false)}>
             <Close />
           </IconButton>
-          <FlexBetween>
+          <FlexBetween sx={{ flexDirection: "column", gap: "32px" }}>
             <IconButton onClick={() => dispatch(setMode())}>
               {theme.palette.mode === "dark" ? (
                 <DarkMode sx={{ fontSize: "25px" }} />
@@ -274,8 +274,12 @@ const Navbar = () => {
             >
               <Message />
             </IconButton>
-            <Notifications sx={{ fontSize: "25px" }} />
-            <Help sx={{ fontSize: "25px" }} />
+            <IconButton sx={{ fontSize: "25px", cursor: "pointer" }}>
+              <Notifications sx={{ fontSize: "25px" }} />
+            </IconButton>
+            <IconButton sx={{ fontSize: "25px", cursor: "pointer" }}>
+              <Help sx={{ fontSize: "25px" }} />
+            </IconButton>
           </FlexBetween>
           <FormControl variant="standard" value={fullName}>
             <Select
